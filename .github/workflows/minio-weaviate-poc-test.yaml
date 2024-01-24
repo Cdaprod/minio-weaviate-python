@@ -1,0 +1,40 @@
+name: Weaviate POC Test
+
+on: [push]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      docker:
+        image: docker:19.03.12
+        options: --privileged
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up Docker Compose
+      run: |
+        docker-compose -f docker-compose.yml up -d
+
+    - name: Create Weaviate Schema
+      run: |
+        curl -X POST -H "Content-Type: application/json" \
+        --data @schema.json http://localhost:8080/v1/schema
+
+    - name: Index Data
+      run: |
+        curl -X POST -H "Content-Type: application/json" \
+        --data @data.json http://localhost:8080/v1/objects
+
+    - name: Perform Backup
+      run: |
+        curl -X POST -H "Content-Type: application/json" \
+        --data '{"id": "backup-id"}' http://localhost:8080/v1/backups/s3
+
+    - name: Restore Data
+      run: |
+        curl -X POST -H "Content-Type: application/json" \
+        http://localhost:8080/v1/backups/s3/backup-id/restore
+
+    - name: Clean up
+      run: docker-compose down

@@ -1,0 +1,16 @@
+[
+  {
+    "class": "Article",
+    "properties": {
+      "title": "Introduction to MinIO",
+      "content": "MinIO is a high performance, distributed object storage system..."
+    }
+  },
+  {
+    "class": "Article",
+    "properties": {
+      "title": "Advanced Features of MinIO",
+      "content": "This article explores advanced features offered by MinIO, including scalability and security..."
+    }
+  }
+]

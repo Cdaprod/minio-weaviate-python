@@ -1,0 +1,20 @@
+{
+  "classes": [
+    {
+      "class": "Article",
+      "description": "A class to store articles",
+      "properties": [
+        {
+          "name": "title",
+          "dataType": ["string"],
+          "description": "The title of the article"
+        },
+        {
+          "name": "content",
+          "dataType": ["text"],
+          "description": "The content of the article"
+        }
+      ]
+    }
+  ]
+}
