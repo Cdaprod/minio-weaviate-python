@@ -1,0 +1,32 @@
+name: Docker Compose & Build Schema Artifact
+
+on: [push]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up Docker Compose
+      run: docker-compose -f docker-compose.yaml up -d
+
+    - name: Wait for python-app to complete initialization
+      run: |
+        echo "Waiting for python-app to complete initialization..."
+        # Here, adjust the sleep time as needed based on an estimated initialization time
+        sleep 60
+        echo "Assuming python-app has completed initialization."
+
+    - name: Fetch Weaviate schema
+      run: |
+        curl http://localhost:8080/v1/schema > weaviate-schema.json
+
+    - name: Upload Weaviate schema as an artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: weaviate-schema
+        path: weaviate-schema.json
+
+    - name: Clean up
+      run: docker-compose down
