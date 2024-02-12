@@ -1,4 +1,4 @@
-name: Docker-Compose Build Test
+name: Docker-Compose Build & Log Test
 
 on: [push]
 
