@@ -7,6 +7,32 @@
 The following directory tree is programatically generated to provide an overview of the repos structure (by using `.github/workflows/update_readme.yml` and `.github/scripts/update_readme.py` and is ran on `push` to `main`):
 
 <!-- DIRECTORY_TREE_START -->
+```
+.
+├── DIRECTORY_TREE.txt
+├── README.md
+├── app
+│   ├── Dockerfile
+│   ├── entrypoint.sh
+│   ├── logs
+│   │   └── python_logs.txt
+│   ├── main.py
+│   └── requirements.txt
+├── docker-compose.yaml
+├── minio
+│   ├── Dockerfile
+│   ├── entrypoint.sh
+│   └── logs
+│       └── minio_logs.txt
+└── weaviate
+    ├── data.json
+    ├── logs
+    │   └── weaviate_logs.txt
+    └── schema.json
+
+6 directories, 14 files
+
+```
 <!-- DIRECTORY_TREE_END -->
 
 ## Introduction
