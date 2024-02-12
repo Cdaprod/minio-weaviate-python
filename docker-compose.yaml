@@ -15,22 +15,46 @@ services:
     command: server /data --console-address ":9001"
 
   weaviate:
+    command:
+    - --host
+    - 0.0.0.0
+    - --port
+    - '8080'
+    - --scheme
+    - http
     container_name: weaviate_server
     image: semitechnologies/weaviate:latest
     ports:
-      - "8080:8080"
+      - 8080:8080
+      - 50051:50051
+    restart: on-failure:0
     environment:
+      QUERY_DEFAULTS_LIMIT: 25
+      DEFAULT_VECTORIZER_MODULE: 'text2vec-transformer'
       AUTHENTICATION_ANONYMOUS_ACCESS_ENABLED: 'true'
       PERSISTENCE_DATA_PATH: '/var/lib/weaviate'
-      ENABLE_MODULES: 's3_backup'
+      ENABLE_MODULES: 'backup-s3, text2vec-transformer'
       BACKUP_S3_BUCKET: 'weaviate-backups'
-      BACKUP_S3_ENDPOINT: 'http://localhost:9000'
+      BACKUP_S3_ENDPOINT: 'http://minio:9000'
       BACKUP_S3_ACCESS_KEY_ID: 'minio'
       BACKUP_S3_SECRET_ACCESS_KEY: 'minio123'
       BACKUP_S3_USE_SSL: 'false'
+      CLUSTER_HOSTNAME: 'node1'
     volumes:
       - ./weaviate/data:/var/lib/weaviate
     depends_on:
+      - minio
+
+  python-app:
+    image: cdaprod/python-app
+    container_name: langchain_app
+    build:
+      context: ./app
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    depends_on:
+      - weaviate
       - minio
 
 volumes:
