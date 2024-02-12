@@ -4,7 +4,7 @@ services:
   minio:
     container_name: minio_server
     image: minio/minio
-      build:
+    build:
       context: ./minio
     volumes:
       - ./minio/data:/data
