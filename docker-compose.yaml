@@ -53,11 +53,11 @@ services:
     build:
       context: ./app
       dockerfile: Dockerfile
-    ports:
-      - "8000:8000"
     depends_on:
       - weaviate
       - minio
+    environment:
+      - KEEP_CONTAINER_ALIVE=true # Set to false or remove for production
 
 volumes:
   minio-data:
