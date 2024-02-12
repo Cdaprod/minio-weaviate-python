@@ -2,7 +2,7 @@ import weaviate
 import json
 
 # Configuration
-WEAVIATE_ENDPOINT = "http://localhost:8080"
+WEAVIATE_ENDPOINT = "http://weaviate:8080"
 OUTPUT_FILE = "weaviate-data.json"
 
 # Initialize the client
