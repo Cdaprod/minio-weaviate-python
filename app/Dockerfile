@@ -1,6 +1,6 @@
 FROM python:3.8
 # Copy your application code and the script
-COPY ./app /app
+COPY . /app
 COPY ./entrypoint.sh /entrypoint.sh
 # Install dependencies
 RUN pip install -r /app/requirements.txt
