@@ -29,7 +29,7 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: service-logs
-        path: 
+        path: |
           - ./minio/logs/minio_logs.txt
           - ./weaviate/logs/weaviate_logs.txt
           - ./python/logs/python_app_logs.txt
