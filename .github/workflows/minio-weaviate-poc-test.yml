@@ -14,9 +14,7 @@ jobs:
 
     - name: Set up Docker Compose
       run: |
-        docker-compose -f docker-compose.yml up -d
+        docker-compose -f docker-compose.yaml up -d
 
     - name: Clean up
       run: docker-compose down
-      
- 
