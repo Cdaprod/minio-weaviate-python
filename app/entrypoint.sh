@@ -28,3 +28,4 @@ else
     echo "Main application script has completed. Exiting now."
     # exit 0 is optional, as the script ends naturally after this point
 fi
+
