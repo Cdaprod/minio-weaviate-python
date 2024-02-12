@@ -1,4 +1,4 @@
-name: Weaviate POC Test
+name: Docker-Compose Build Test
 
 on: [push]
 
