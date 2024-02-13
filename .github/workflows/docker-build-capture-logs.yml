@@ -16,7 +16,7 @@ jobs:
       run: |
         docker run --name python-app python-app &
         APP_PID=$!
-        sleep 10  # Adjust sleep as necessary to allow your application to initialize and generate logs
+        sleep 1  # Adjust sleep as necessary to allow your application to initialize and generate logs
         docker stop python-app
         wait $APP_PID
         cat app_stdout.txt
