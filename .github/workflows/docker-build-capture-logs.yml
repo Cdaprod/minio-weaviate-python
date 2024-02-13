@@ -19,6 +19,8 @@ jobs:
         sleep 10  # Adjust sleep as necessary to allow your application to initialize and generate logs
         docker stop python-app
         wait $APP_PID
+        cat app_stdout.txt
+        cat app_stderr.txt >&2  # Direct stderr to the workflow's stderr to highlight errors
 
     - name: Capture Container Logs
       run: docker logs python-app > container_logs.txt
