@@ -24,6 +24,7 @@ The following directory tree is programatically generated to provide an overview
 │   │   └── python_logs.txt
 │   ├── main.py
 │   └── requirements.txt
+├── docker-compose.tailscale.yaml
 ├── docker-compose.yaml
 ├── minio
 │   ├── Dockerfile
@@ -31,10 +32,9 @@ The following directory tree is programatically generated to provide an overview
 │   └── logs
 │       └── minio_logs.txt
 └── weaviate
-    ├── data.json
-    ├── logs
-    │   └── weaviate_logs.txt
-    └── schema.json
+    └── logs
+        ├── weaviate-schema.json
+        └── weaviate_logs.txt
 
 6 directories, 14 files
 
