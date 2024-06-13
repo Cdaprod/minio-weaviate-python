@@ -1,6 +1,7 @@
 name: Update README with Directory Tree
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - main  # or your default branch
