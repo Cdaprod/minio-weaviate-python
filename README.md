@@ -5,6 +5,10 @@
 
 [![Update README with Directory Tree](https://github.com/Cdaprod/minio-weaviate-python/actions/workflows/update_readme.yml/badge.svg)](https://github.com/Cdaprod/minio-weaviate-python/actions/workflows/update_readme.yml)
 
+## Docs and Guides
+
+- [Dynamic ETL: DIY CLI Functions for Parsing Data via MinIO & Weaviate](/docs/streamline_hybrid_cloud_operations_with_minio_and_weaviate.md)
+
 ## Current Directory Tree Structure
 The following directory tree is programatically generated to provide an overview of the repos structure (by using `.github/workflows/update_readme.yml` and `.github/scripts/update_readme.py` and is ran on `push` to `main`):
 
@@ -54,7 +58,7 @@ To start a new project based on this template:
 
 Based on the available information from the MinIO and Weaviate documentation, here are the specific commands and configurations for setting up MinIO and Weaviate using Dockerfile and `entrypoint.sh`. However, the exact details for MinIO were not found in the recent search, so I'll provide a general approach based on common practices.
 
-### MinIO Setup using Dockerfile and entrypoint.sh
+## MinIO Setup using Dockerfile and entrypoint.sh
 
 To configure a MinIO server using Docker, you typically start by creating a `Dockerfile` that specifies the MinIO server image and any necessary environment variables. The `entrypoint.sh` script is used to customize the startup behavior of the MinIO server.
 
@@ -120,6 +124,8 @@ To clone a specific version of this project, use the following command, replacin
 ```bash
 git clone --branch tag_name --depth 1 https://github.com/cdaprod/minio-weaviate-langchain.git
 ```
+
+
 
 ## Contributing
 We welcome contributions! Please read our contributing guidelines on how to propose changes.
