@@ -1,0 +1,167 @@
+Here's the updated `docker-compose.yml` file for deploying MinIO and Weaviate servers, each with a dedicated Tailscale container. This setup ensures that both services are accessible over your Tailscale tailnet with the appropriate environment variables and configurations.
+
+### docker-compose.yml
+
+```yaml
+version: '3.8'
+
+# Set Variables: TS_AUTHKEY, TS_CERT_DOMAIN, MINIO_DOMAIN, MINIO_BROWSER_REDIRECT_URL, MINIO_ROOT_USER, MINIO_ROOT_PASSWORD, WEAVIATE_ORIGIN
+# Configuration Files: TS_SERVE_CONFIG
+
+services:
+  tailscale-minio:
+    image: tailscale/tailscale:latest
+    container_name: tailscale-minio
+    hostname: tailscale-minio # The Tailnet node will be named this for use with MagicDNS
+    volumes:
+      - /dev/net/tun:/dev/net/tun
+      - ${PWD}/tailscale-minio/state:/var/lib/tailscale
+    environment:
+      - TS_AUTHKEY=${TS_AUTHKEY}
+      - TS_STATE_DIR=/var/lib/tailscale
+      - TS_SERVE_CONFIG=/tailscale/minio.json
+      - TS_EXTRA_ARGS=--advertise-routes=10.0.0.0/24 --advertise-tags=tag:container --accept-routes --advertise-exit-node
+    cap_add:
+      - NET_ADMIN
+      - SYS_MODULE
+    network_mode: host
+    restart: unless-stopped
+
+  minio:
+    image: minio/minio:latest
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+      MINIO_DOMAIN: minio.${TS_CERT_DOMAIN}
+      MINIO_BROWSER_REDIRECT_URL: https://${MINIO_DOMAIN}
+    command: server /data --address ":9000" --console-address ":9001"
+    volumes:
+      - minio_data:/data
+    depends_on:
+      - tailscale-minio
+    network_mode: service:tailscale-minio
+
+  tailscale-weaviate:
+    image: tailscale/tailscale:latest
+    container_name: tailscale-weaviate
+    hostname: tailscale-weaviate # The Tailnet node will be named this for use with MagicDNS
+    volumes:
+      - /dev/net/tun:/dev/net/tun
+      - ${PWD}/tailscale-weaviate/state:/var/lib/tailscale
+    environment:
+      - TS_AUTHKEY=${TS_AUTHKEY}
+      - TS_STATE_DIR=/var/lib/tailscale
+      - TS_SERVE_CONFIG=/tailscale/weaviate.json
+      - TS_EXTRA_ARGS=--advertise-routes=10.0.0.0/24 --advertise-tags=tag:container --accept-routes --advertise-exit-node
+    cap_add:
+      - NET_ADMIN
+      - SYS_MODULE
+    network_mode: host
+    restart: unless-stopped
+
+  weaviate:
+    image: semitechnologies/weaviate:latest
+    environment:
+      QUERY_DEFAULTS_LIMIT: 20
+      AUTHENTICATION_ANONYMOUS_ACCESS_ENABLED: 'true'
+      WEAVIATE_ORIGIN: ${WEAVIATE_ORIGIN}
+    ports:
+      - "8080:8080"
+    depends_on:
+      - tailscale-weaviate
+    network_mode: service:tailscale-weaviate
+
+volumes:
+  minio_data:
+    driver: local
+  tailscale-minio:
+    driver: local
+  tailscale-weaviate:
+    driver: local
+
+networks:
+  app_network:
+    driver: bridge
+```
+
+### Bash Functions and Aliases
+
+Add the following bash functions and aliases to your `~/.bashrc` or `~/.bash_profile` to interact with your MinIO and Weaviate services via the CLI.
+
+#### Add to `~/.bashrc` or `~/.bash_profile`
+
+```bash
+# Function to upload a file to MinIO
+upload_to_minio() {
+    python3 minio_weaviate.py upload "$1" "$2"
+}
+
+# Function to index a file in Weaviate
+index_in_weaviate() {
+    python3 minio_weaviate.py index "$1" "$2" "$3" "$4"
+}
+
+# Function to upload a file to MinIO and index it in Weaviate
+upload_and_index() {
+    python3 minio_weaviate.py upload_and_index "$1" "$2" "$3" "$4"
+}
+
+# Aliases for convenience
+alias minio_upload=upload_to_minio
+alias weaviate_index=index_in_weaviate
+alias upload_index=upload_and_index
+```
+
+After adding these lines, reload your bash profile:
+
+```sh
+source ~/.bashrc
+# or
+source ~/.bash_profile
+```
+
+### Python Script for MinIO and Weaviate
+
+Create a Python script called `minio_weaviate.py` to handle the upload and indexing operations.
+
+#### minio_weaviate.py
+
+```python
+from minio import Minio
+from weaviate import Client
+import sys
+import json
+
+# MinIO Configuration
+minio_client = Minio(
+    "minio.${TS_CERT_DOMAIN}:9000",  # MinIO server address
+    access_key="minioadmin",  # MinIO access key
+    secret_key="minioadmin",  # MinIO secret key
+    secure=True  # Using HTTPS
+)
+
+# Weaviate Configuration
+weaviate_client = Client(
+    "https://weaviate.${TS_CERT_DOMAIN}:8080",  # Weaviate server address
+)
+
+def upload_to_minio(file_path, bucket_name):
+    # Upload file to MinIO
+    minio_client.fput_object(bucket_name, file_path, file_path)
+    print(f"Uploaded {file_path} to bucket {bucket_name}.")
+
+def index_in_weaviate(file_path, bucket_name, class_name, schema):
+    # Create an object in Weaviate
+    weaviate_client.data_object.create({
+        "file_name": file_path,
+        "bucket": bucket_name
+    }, class_name, schema)
+    print(f"Indexed {file_path} in Weaviate class {class_name}.")
+
+def upload_and_index(file_path, bucket_name, class_name, schema):
+    upload_to_minio(file_path, bucket_name)
+    index_in_weaviate(file_path, bucket_name, class_name, schema)
+
+if __name__ == "__main__":
+    action = sys.argv[1]
+    file_path = sys.argv[2
