@@ -1,17 +1,19 @@
-Here's the updated `docker-compose.yml` file for deploying MinIO and Weaviate servers, each with a dedicated Tailscale container. This setup ensures that both services are accessible over your Tailscale tailnet with the appropriate environment variables and configurations.
-
-### docker-compose.yml
-
-```yaml
 version: '3.8'
-
 # Set Variables: TS_AUTHKEY, TS_CERT_DOMAIN, MINIO_DOMAIN, MINIO_BROWSER_REDIRECT_URL, MINIO_ROOT_USER, MINIO_ROOT_PASSWORD, WEAVIATE_ORIGIN
 # Configuration Files: TS_SERVE_CONFIG
-
+# ------------------------------------------
+## Commands to set environment variables:
+# export TS_AUTHKEY="your_tailscale_authkey"
+# export TS_CERT_DOMAIN="your_cert_domain"
+# export MINIO_DOMAIN="your_minio_domain"
+# export MINIO_BROWSER_REDIRECT_URL="https://${MINIO_DOMAIN}"
+# export MINIO_ROOT_USER="your_minio_root_user"
+# export MINIO_ROOT_PASSWORD="your_minio_root_password"
+# export WEAVIATE_ORIGIN="your_weaviate_origin"
+# ------------------------------------------
 services:
   tailscale-minio:
     image: tailscale/tailscale:latest
-    container_name: tailscale-minio
     hostname: tailscale-minio # The Tailnet node will be named this for use with MagicDNS
     volumes:
       - /dev/net/tun:/dev/net/tun
@@ -19,8 +21,8 @@ services:
     environment:
       - TS_AUTHKEY=${TS_AUTHKEY}
       - TS_STATE_DIR=/var/lib/tailscale
-      - TS_SERVE_CONFIG=/tailscale/minio.json
-      - TS_EXTRA_ARGS=--advertise-routes=10.0.0.0/24 --advertise-tags=tag:container --accept-routes --advertise-exit-node
+      - TS_SERVE_CONFIG=/TS_CONFIG.json
+      - TS_EXTRA_ARGS=--advertise-routes=192.168.0.0/24 --advertise-tags=tag:infra --accept-routes --advertise-exit-node --ssh
     cap_add:
       - NET_ADMIN
       - SYS_MODULE
@@ -29,6 +31,7 @@ services:
 
   minio:
     image: minio/minio:latest
+    hostname: minio_server
     environment:
       MINIO_ROOT_USER: ${MINIO_ROOT_USER}
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
@@ -40,10 +43,12 @@ services:
     depends_on:
       - tailscale-minio
     network_mode: service:tailscale-minio
+    ports:
+      - "9000:9000"
+      - "9001:9001"
 
   tailscale-weaviate:
     image: tailscale/tailscale:latest
-    container_name: tailscale-weaviate
     hostname: tailscale-weaviate # The Tailnet node will be named this for use with MagicDNS
     volumes:
       - /dev/net/tun:/dev/net/tun
@@ -51,8 +56,8 @@ services:
     environment:
       - TS_AUTHKEY=${TS_AUTHKEY}
       - TS_STATE_DIR=/var/lib/tailscale
-      - TS_SERVE_CONFIG=/tailscale/weaviate.json
-      - TS_EXTRA_ARGS=--advertise-routes=10.0.0.0/24 --advertise-tags=tag:container --accept-routes --advertise-exit-node
+      - TS_SERVE_CONFIG=/TS_CONFIG.json
+      - TS_EXTRA_ARGS=--advertise-routes=192.168.0.0/24 --advertise-tags=tag:infra --accept-routes --advertise-exit-node --ssh
     cap_add:
       - NET_ADMIN
       - SYS_MODULE
@@ -61,277 +66,77 @@ services:
 
   weaviate:
     image: semitechnologies/weaviate:latest
+    hostname: weaviate_server
+    command:
+      - --host
+      - 0.0.0.0
+      - --port
+      - '8080'
+      - --scheme
+      - http
     environment:
       QUERY_DEFAULTS_LIMIT: 20
       AUTHENTICATION_ANONYMOUS_ACCESS_ENABLED: 'true'
       WEAVIATE_ORIGIN: ${WEAVIATE_ORIGIN}
+      PERSISTENCE_DATA_PATH: '/var/lib/weaviate'
+      ENABLE_MODULES: 'backup-s3,text2vec-cohere,text2vec-huggingface,text2vec-palm,text2vec-openai,generative-openai,generative-cohere,generative-palm,ref2vec-centroid,reranker-cohere,qna-openai'
+      BACKUP_S3_BUCKET: 'weaviate-backups'
+      BACKUP_S3_ENDPOINT: '${MINIO_DOMAIN}:9000'
+      BACKUP_S3_ACCESS_KEY_ID: ${MINIO_ROOT_USER}
+      BACKUP_S3_SECRET_ACCESS_KEY: ${MINIO_ROOT_PASSWORD}
+      BACKUP_S3_USE_SSL: 'true'
     ports:
       - "8080:8080"
+      - "50051:50051" # gRPC port
     depends_on:
       - tailscale-weaviate
+      - minio
     network_mode: service:tailscale-weaviate
+    volumes:
+      - weaviate_data:/var/lib/weaviate
+
+  tailscale-python:
+    image: tailscale/tailscale:latest
+    hostname: tailscale-python # The Tailnet node will be named this for use with MagicDNS
+    volumes:
+      - /dev/net/tun:/dev/net/tun
+      - ${PWD}/tailscale-python/state:/var/lib/tailscale
+    environment:
+      - TS_AUTHKEY=${TS_AUTHKEY}
+      - TS_STATE_DIR=/var/lib/tailscale
+      - TS_SERVE_CONFIG=/TS_CONFIG.json
+      - TS_EXTRA_ARGS=--advertise-routes=192.168.0.0/24 --advertise-tags=tag:infra --accept-routes --advertise-exit-node --ssh
+    cap_add:
+      - NET_ADMIN
+      - SYS_MODULE
+    network_mode: host
+    restart: unless-stopped
+
+  python-app:
+    image: cdaprod/python-app
+    hostname: python_app
+    build:
+      context: ./app
+      dockerfile: Dockerfile
+    depends_on:
+      - weaviate
+      - minio
+    environment:
+      - KEEP_CONTAINER_ALIVE=true # Set to false or remove for production
+    network_mode: service:tailscale-python
 
 volumes:
   minio_data:
+    driver: local
+  weaviate_data:
     driver: local
   tailscale-minio:
     driver: local
   tailscale-weaviate:
     driver: local
+  tailscale-python:
+    driver: local
 
 networks:
   app_network:
     driver: bridge
-```
-
-### Setup Script foe MinIO Weaviate Tailscale
-
-```bash
-#!/bin/bash
-
-# Set environment variables
-export TS_AUTHKEY="your_tailscale_authkey"
-export TS_CERT_DOMAIN="your_cert_domain"
-export MINIO_DOMAIN="your_minio_domain"
-export MINIO_BROWSER_REDIRECT_URL="https://${MINIO_DOMAIN}"
-export MINIO_ROOT_USER="your_minio_root_user"
-export MINIO_ROOT_PASSWORD="your_minio_root_password"
-export WEAVIATE_ORIGIN="your_weaviate_origin"
-
-# Generate TS_CONFIG.json
-cat <<EOL > TS_CONFIG.json
-{
-    "TCP": {
-        "443": {
-            "HTTPS": true
-        }
-    },
-    "Web": {
-        "minio.${TS_CERT_DOMAIN}:443": {
-            "Handlers": {
-                "/": {
-                    "Proxy": "http://127.0.0.1:9001"
-                }
-            }
-        },
-        "weaviate.${TS_CERT_DOMAIN}:443": {
-            "Handlers": {
-                "/": {
-                    "Proxy": "http://127.0.0.1:8080"
-                }
-            }
-        }
-    },
-    "AllowFunnel": {
-        "minio.${TS_CERT_DOMAIN}:443": false,
-        "weaviate.${TS_CERT_DOMAIN}:443": false
-    }
-}
-EOL
-
-# Start Docker Compose
-docker-compose -f docker-compose.ts.yaml up -d
-```
-
-### Enhancements for User Interaction
-
-To refine the user experience when using these from the CLI, interactive prompts can guide the user through the necessary inputs. This can be achieved by adding input validation and prompts in the Python script.
-
-### Improved Python Script with Interactive Prompts
-
-```python
-from minio import Minio
-from weaviate import Client
-from pydantic import BaseModel
-from unstructured.partition.auto import partition
-import sys
-
-class MinioMetadata(BaseModel):
-    object_name: str
-    last_modified: str
-    etag: str
-    size: int
-    content_type: str
-    metadata: dict
-
-class WeaviateObject(BaseModel):
-    object_name: str
-    last_modified: str
-    etag: str
-    size: int
-    content_type: str
-    metadata: dict
-
-class MinioManager:
-    def __init__(self, endpoint, access_key, secret_key, secure=True):
-        self.client = Minio(endpoint, access_key=access_key, secret_key=secret_key, secure=secure)
-
-    def create_bucket(self, bucket_name):
-        if not self.client.bucket_exists(bucket_name):
-            self.client.make_bucket(bucket_name)
-            print(f"Bucket {bucket_name} created.")
-        else:
-            print(f"Bucket {bucket_name} already exists.")
-
-    def upload_file(self, bucket_name, file_path):
-        self.client.fput_object(bucket_name, file_path, file_path)
-        print(f"Uploaded {file_path} to bucket {bucket_name}.")
-
-    def get_object_metadata(self, bucket_name, file_path):
-        stat = self.client.stat_object(bucket_name, file_path)
-        return MinioMetadata(
-            object_name=stat.object_name,
-            last_modified=stat.last_modified.isoformat(),
-            etag=stat.etag,
-            size=stat.size,
-            content_type=stat.content_type,
-            metadata=stat.metadata
-        )
-
-class WeaviateManager:
-    def __init__(self, url):
-        self.client = Client(url)
-
-    def create_class(self, class_name):
-        if not self.client.schema.contains({"class": class_name}):
-            class_obj = {
-                "class": class_name,
-                "properties": [
-                    {"name": "object_name", "dataType": ["string"]},
-                    {"name": "last_modified", "dataType": ["date"]},
-                    {"name": "etag", "dataType": ["string"]},
-                    {"name": "size", "dataType": ["int"]},
-                    {"name": "content_type", "dataType": ["string"]},
-                    {"name": "metadata", "dataType": ["string"]}
-                ]
-            }
-            self.client.schema.create_class(class_obj)
-            print(f"Class {class_name} created.")
-        else:
-            print(f"Class {class_name} already exists.")
-
-    def index_file(self, class_name, data_object):
-        self.client.data_object.create(data_object.dict(), class_name)
-        print(f"Indexed object in Weaviate class {class_name}.")
-
-class DataManager:
-    def __init__(self, minio_endpoint, minio_access_key, minio_secret_key, weaviate_url):
-        self.minio_manager = MinioManager(minio_endpoint, minio_access_key, minio_secret_key)
-        self.weaviate_manager = WeaviateManager(weaviate_url)
-        self.bucket_class_map = {
-            "Document": "document-bucket",
-            "Snippet": "snippet-bucket",
-            "Configuration": "config-bucket",
-            "Website": "website-bucket",
-            "Image": "image-bucket",
-            "Video": "video-bucket"
-        }
-
-    def upload_and_index(self, file_path, class_name):
-        if class_name not in self.bucket_class_map:
-            raise ValueError(f"Unsupported class name: {class_name}")
-        bucket_name = self.bucket_class_map[class_name]
-        self.minio_manager.create_bucket(bucket_name)
-        self.minio_manager.upload_file(bucket_name, file_path)
-        metadata = self.minio_manager.get_object_metadata(bucket_name, file_path)
-        self.weaviate_manager.create_class(class_name)
-        self.weaviate_manager.index_file(class_name, WeaviateObject(**metadata.dict()))
-
-def prompt_for_input(prompt_text):
-    return input(prompt_text).strip()
-
-if __name__ == "__main__":
-    if len(sys.argv) < 2:
-        print("Usage: python3 minio_weaviate.py <action> <additional_parameters>")
-        print("Actions: upload, index, upload_and_index")
-        sys.exit(1)
-
-    action = sys.argv[1]
-
-    if action not in ["upload", "index", "upload_and_index"]:
-        print("Invalid action. Use 'upload', 'index', or 'upload_and_index'.")
-        sys.exit(1)
-
-    file_path = prompt_for_input("Enter the file path: ")
-    class_name = prompt_for_input("Enter the class name (Document, Snippet, Configuration, Website, Image, Video): ")
-
-    minio_endpoint = prompt_for_input("Enter the MinIO endpoint: ")
-    minio_access_key = prompt_for_input("Enter the MinIO access key: ")
-    minio_secret_key = prompt_for_input("Enter the MinIO secret key: ")
-    weaviate_url = prompt_for_input("Enter the Weaviate URL: ")
-
-    manager = DataManager(minio_endpoint, minio_access_key, minio_secret_key, weaviate_url)
-
-    if action == "upload":
-        manager.minio_manager.upload_file(class_name, file_path)
-    elif action == "index":
-        metadata = manager.minio_manager.get_object_metadata(class_name, file_path)
-        manager.weaviate_manager.index_file(class_name, metadata)
-    elif action == "upload_and_index":
-        manager.upload_and_index(file_path, class_name)
-    else:
-        print("Invalid action. Use 'upload', 'index', or 'upload_and_index'.")
-```
-
-### Usage Examples with Interactive Guidance
-
-Now, if you run any of the commands without the required arguments, it will guide you on how to properly use them.
-
-#### Upload a file to MinIO
-
-```sh
-minio_upload example.txt Document
-```
-
-If you run `minio_upload` without arguments:
-
-```sh
-minio_upload
-```
-
-You will see:
-
-```
-Usage: minio_upload <file_path> <class_name>
-Class names: Document, Snippet, Configuration, Website, Image, Video
-```
-
-#### Index a file in Weaviate
-
-```sh
-weaviate_index example.txt Document
-```
-
-If you run `weaviate_index` without arguments:
-
-```sh
-weaviate_index
-```
-
-You will see:
-
-```
-Usage: weaviate_index <file_path> <class_name>
-Class names: Document, Snippet, Configuration, Website, Image, Video
-```
-
-#### Upload a file to MinIO and index it in Weaviate
-
-```sh
-upload_index example.txt Document
-```
-
-If you run `upload_index` without arguments:
-
-```sh
-upload_index
-```
-
-You will see:
-
-```
-Usage: upload_index <file_path> <class_name>
-Class names: Document, Snippet, Configuration, Website, Image, Video
-```
-
-This setup improves the user experience by providing interactive prompts and guidance when using the CLI commands, ensuring users can successfully execute the alias tools for their needs. The use of Pydantic models and `unstructured-io` enhances the robustness and extendibility of the system.
