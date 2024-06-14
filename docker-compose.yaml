@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   minio:
-    container_name: minio_server
+    hostname: minio
     image: minio/minio
     build:
       context: ./minio
@@ -24,7 +24,7 @@ services:
     - '8080'
     - --scheme
     - http
-    container_name: weaviate_server
+    hostname: weaviate
     image: semitechnologies/weaviate:latest
     ports:
       - 8080:8080
@@ -49,7 +49,7 @@ services:
 
   python-app:
     image: cdaprod/python-app
-    container_name: python-app
+    hostname: python-app
     build:
       context: ./app
       dockerfile: Dockerfile
