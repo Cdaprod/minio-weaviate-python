@@ -17,6 +17,7 @@ The following directory tree is programatically generated to provide an overview
 .
 ├── DIRECTORY_TREE.txt
 ├── README.md
+├── TS_SERVE_CONFIG.json
 ├── app
 │   ├── Dockerfile
 │   ├── entrypoint.sh
@@ -24,7 +25,8 @@ The following directory tree is programatically generated to provide an overview
 │   │   └── python_logs.txt
 │   ├── main.py
 │   └── requirements.txt
-├── docker-compose.tailscale.yaml
+├── docker-compose.minio-weaviate-python.ts.yaml
+├── docker-compose.minio-weaviate.ts.yaml
 ├── docker-compose.yaml
 ├── docs
 │   └── streamline_hybrid_cloud_operations_with_minio_and_weaviate.md
@@ -38,7 +40,7 @@ The following directory tree is programatically generated to provide an overview
         ├── weaviate-schema.json
         └── weaviate_logs.txt
 
-7 directories, 15 files
+7 directories, 17 files
 
 ```
 <!-- DIRECTORY_TREE_END -->
