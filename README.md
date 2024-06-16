@@ -29,9 +29,11 @@ The following directory tree is programatically generated to provide an overview
 ├── docker-compose.minio-weaviate.ts.yaml
 ├── docker-compose.yaml
 ├── docs
+│   ├── hybrid_cloud_dns_records_setting_environment_variables_for_minio_weaviate_ts_and_cloudflare.md
 │   └── streamline_hybrid_cloud_operations_with_minio_and_weaviate.md
 ├── minio
 │   ├── Dockerfile
+│   ├── docker-compose.minio.ts.yaml
 │   ├── entrypoint.sh
 │   └── logs
 │       └── minio_logs.txt
@@ -40,7 +42,7 @@ The following directory tree is programatically generated to provide an overview
         ├── weaviate-schema.json
         └── weaviate_logs.txt
 
-7 directories, 17 files
+7 directories, 19 files
 
 ```
 <!-- DIRECTORY_TREE_END -->
