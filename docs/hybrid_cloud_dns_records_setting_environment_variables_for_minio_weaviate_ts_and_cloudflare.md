@@ -1,3 +1,43 @@
+To set up the environment variables correctly for your Tailscale and Cloudflare integration, let's define them based on your current setup:
+
+### Environment Variables
+
+1. **TS_CERT_DOMAIN**: This should be your Tailnet domain, which is `tailb3ac8.ts.net`.
+2. **CF_KEY**: Your Cloudflare API key.
+3. **CF_DOMAIN**: Your Cloudflare domain, which is `cdaprod.dev`.
+4. **TS_KEY**: Your Tailscale API key.
+5. **TS_TAILNET**: Your Tailnet name, which is `cdaprod`.
+
+Here is an example `.env` file with placeholders for these variables:
+
+```env
+# Tailscale Variables
+TS_CERT_DOMAIN=tailb3ac8.ts.net
+TS_KEY=your_tailscale_api_key
+TS_TAILNET=cdaprod
+
+# Cloudflare Variables
+CF_KEY=your_cloudflare_api_key
+CF_DOMAIN=cdaprod.dev
+
+# MinIO Variables
+MINIO_ROOT_USER=your_minio_root_user
+MINIO_ROOT_PASSWORD=your_minio_root_password
+MINIO_DOMAIN=minio.cdaprod.dev
+MINIO_BROWSER_REDIRECT_URL=https://${MINIO_DOMAIN}
+
+# Weaviate Variables
+WEAVIATE_ORIGIN=weaviate.cdaprod.dev
+
+# Additional Variables for Tailscale Containers
+TS_AUTHKEY=your_tailscale_authkey
+```
+
+### Updated Docker Compose File
+
+Here’s an updated `docker-compose.yml` file using the environment variables:
+
+```yaml
 version: '3.8'
 
 services:
@@ -43,11 +83,11 @@ services:
     volumes:
       - /dev/net/tun:/dev/net/tun
       - ${PWD}/tailscale-weaviate/state:/var/lib/tailscale
-      - ${PWD}/TS_SERVE_CONFIG.json:/TS_SERVE_CONFIG.json
+      - ${PWD}/TS_SERVE_CONFIG.json:/TS_CONFIG.json
     environment:
       - TS_AUTHKEY=${TS_AUTHKEY}
       - TS_STATE_DIR=/var/lib/tailscale
-      - TS_SERVE_CONFIG=/TS_SERVE_CONFIG.json
+      - TS_SERVE_CONFIG=/TS_CONFIG.json
       - TS_EXTRA_ARGS=--advertise-routes=192.168.0.0/24 --advertise-tags=tag:infra --accept-routes --advertise-exit-node --ssh
     cap_add:
       - NET_ADMIN
@@ -96,7 +136,7 @@ services:
     environment:
       - TS_AUTHKEY=${TS_AUTHKEY}
       - TS_STATE_DIR=/var/lib/tailscale
-      - TS_SERVE_CONFIG=/TS_SERVE_CONFIG.json
+      - TS_SERVE_CONFIG=/TS_CONFIG.json
       - TS_EXTRA_ARGS=--advertise-routes=192.168.0.0/24 --advertise-tags=tag:infra --accept-routes --advertise-exit-node --ssh
     cap_add:
       - NET_ADMIN
@@ -132,3 +172,17 @@ volumes:
 networks:
   app_network:
     driver: bridge
+```
+
+### Summary
+
+- **TS_CERT_DOMAIN**: The Tailnet domain.
+- **CF_KEY**: Cloudflare API key.
+- **CF_DOMAIN**: Cloudflare domain (`cdaprod.dev`).
+- **TS_KEY**: Tailscale API key.
+- **TS_TAILNET**: Tailnet name.
+- **MINIO_ROOT_USER** and **MINIO_ROOT_PASSWORD**: MinIO credentials.
+- **MINIO_DOMAIN** and **MINIO_BROWSER_REDIRECT_URL**: MinIO domain settings.
+- **WEAVIATE_ORIGIN**: Weaviate origin domain.
+
+By setting these environment variables and configuring your `docker-compose.yml` and `.env` files accordingly, you can ensure that your Tailscale, Cloudflare, MinIO, Weaviate, and Python application integration is correctly set up. If you encounter any issues or need further assistance, feel free to ask!

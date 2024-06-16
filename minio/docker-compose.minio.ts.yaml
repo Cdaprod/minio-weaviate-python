@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  tailscale-minio:
+    image: tailscale/tailscale:latest
+    hostname: tailscale-minio
+    volumes:
+      - /dev/net/tun:/dev/net/tun
+      - ${PWD}/tailscale-minio/state:/var/lib/tailscale
+      - ${PWD}/TS_SERVE_CONFIG.json:/TS_CONFIG.json
+    environment:
+      - TS_AUTHKEY=${TS_AUTHKEY}
+      - TS_STATE_DIR=/var/lib/tailscale
+      - TS_SERVE_CONFIG=/TS_CONFIG.json
+      - TS_EXTRA_ARGS=--advertise-routes=192.168.0.0/24 --advertise-tags=tag:infra --accept-routes --advertise-exit-node --ssh
+    cap_add:
+      - NET_ADMIN
+      - SYS_MODULE
+    network_mode: host
+    restart: unless-stopped
+
+  minio:
+    image: minio/minio:latest
+    hostname: minio_server
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+      MINIO_DOMAIN: minio.${TS_CERT_DOMAIN}
+      MINIO_BROWSER_REDIRECT_URL: https://${MINIO_DOMAIN}
+    command: server /data --address ":9000" --console-address ":9001"
+    volumes:
+      - minio_data:/data
+    depends_on:
+      - tailscale-minio
+    network_mode: service:tailscale-minio
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+
+volumes:
+  minio_data:
+    driver: local
+  tailscale-minio:
+    driver: local
