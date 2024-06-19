@@ -6,8 +6,8 @@ services:
     hostname: tailscale-minio
     volumes:
       - /dev/net/tun:/dev/net/tun
-      - ${PWD}/tailscale-minio/state:/var/lib/tailscale
-      - ${PWD}/TS_SERVE_CONFIG.json:/TS_CONFIG.json
+      - ./tailscale-minio/state:/var/lib/tailscale
+      - ./TS_SERVE_CONFIG.json:/TS_CONFIG.json
     environment:
       - TS_AUTHKEY=${TS_AUTHKEY}
       - TS_STATE_DIR=/var/lib/tailscale
@@ -40,8 +40,8 @@ services:
     hostname: tailscale-weaviate
     volumes:
       - /dev/net/tun:/dev/net/tun
-      - ${PWD}/tailscale-weaviate/state:/var/lib/tailscale
-      - ${PWD}/TS_SERVE_CONFIG.json:/TS_SERVE_CONFIG.json
+      - ./tailscale-weaviate/state:/var/lib/tailscale
+      - ./TS_SERVE_CONFIG.json:/TS_SERVE_CONFIG.json
     environment:
       - TS_AUTHKEY=${TS_AUTHKEY}
       - TS_STATE_DIR=/var/lib/tailscale
@@ -87,8 +87,8 @@ services:
     hostname: tailscale-python
     volumes:
       - /dev/net/tun:/dev/net/tun
-      - ${PWD}/tailscale-python/state:/var/lib/tailscale
-      - ${PWD}/TS_SERVE_CONFIG.json:/TS_CONFIG.json
+      - ./tailscale-python/state:/var/lib/tailscale
+      - ./TS_SERVE_CONFIG.json:/TS_CONFIG.json
     environment:
       - TS_AUTHKEY=${TS_AUTHKEY}
       - TS_STATE_DIR=/var/lib/tailscale
