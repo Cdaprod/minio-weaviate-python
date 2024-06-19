@@ -16,12 +16,10 @@ services:
     cap_add:
       - NET_ADMIN
       - SYS_MODULE
-    #network_mode: host
     restart: unless-stopped
 
   minio:
     image: minio/minio:latest
-    hostname: minio_server
     environment:
       MINIO_ROOT_USER: ${MINIO_ROOT_USER}
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
@@ -52,12 +50,10 @@ services:
     cap_add:
       - NET_ADMIN
       - SYS_MODULE
-    #network_mode: host
     restart: unless-stopped
 
   weaviate:
     image: semitechnologies/weaviate:latest
-    hostname: weaviate_server
     command:
       - --host
       - 0.0.0.0
@@ -101,12 +97,10 @@ services:
     cap_add:
       - NET_ADMIN
       - SYS_MODULE
-    #network_mode: host
     restart: unless-stopped
 
   python-app:
     image: cdaprod/python-app
-    hostname: python_app
     build:
       context: ./app
       dockerfile: Dockerfile
