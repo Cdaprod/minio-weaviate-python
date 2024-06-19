@@ -16,7 +16,7 @@ services:
     cap_add:
       - NET_ADMIN
       - SYS_MODULE
-    network_mode: host
+    #network_mode: host
     restart: unless-stopped
 
   minio:
@@ -52,7 +52,7 @@ services:
     cap_add:
       - NET_ADMIN
       - SYS_MODULE
-    network_mode: host
+    #network_mode: host
     restart: unless-stopped
 
   weaviate:
@@ -101,7 +101,7 @@ services:
     cap_add:
       - NET_ADMIN
       - SYS_MODULE
-    network_mode: host
+    #network_mode: host
     restart: unless-stopped
 
   python-app:
