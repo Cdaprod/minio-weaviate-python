@@ -14,7 +14,7 @@ version: '3.8'
 services:
   tailscale-minio:
     image: tailscale/tailscale:latest
-    hostname: tailscale-minio # The Tailnet node will be named this for use with MagicDNS
+    hostname: minio-ts # The Tailnet node will be named this for use with MagicDNS
     volumes:
       - /dev/net/tun:/dev/net/tun
       - tailscale-minio-state:/var/lib/tailscale
@@ -48,7 +48,7 @@ services:
 
   tailscale-weaviate:
     image: tailscale/tailscale:latest
-    hostname: tailscale-weaviate # The Tailnet node will be named this for use with MagicDNS
+    hostname: weaviate-ts # The Tailnet node will be named this for use with MagicDNS
     volumes:
       - /dev/net/tun:/dev/net/tun
       - tailscale-weaviate-state:/var/lib/tailscale
@@ -95,7 +95,7 @@ services:
 
   tailscale-python:
     image: tailscale/tailscale:latest
-    hostname: tailscale-python # The Tailnet node will be named this for use with MagicDNS
+    hostname: python-ts # The Tailnet node will be named this for use with MagicDNS
     volumes:
       - /dev/net/tun:/dev/net/tun
       - tailscale-python-state:/var/lib/tailscale
