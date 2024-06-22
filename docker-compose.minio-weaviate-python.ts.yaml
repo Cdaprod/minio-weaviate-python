@@ -3,7 +3,6 @@ version: '3.8'
 services:
   tailscale-minio:
     image: tailscale/tailscale:latest
-    hostname: tailscale-minio
     volumes:
       - /dev/net/tun:/dev/net/tun
       - ./tailscale-minio/state:/var/lib/tailscale
@@ -20,6 +19,7 @@ services:
 
   minio:
     image: minio/minio:latest
+    hostname: minio
     environment:
       MINIO_ROOT_USER: ${MINIO_ROOT_USER}
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
@@ -37,7 +37,6 @@ services:
 
   tailscale-weaviate:
     image: tailscale/tailscale:latest
-    hostname: tailscale-weaviate
     volumes:
       - /dev/net/tun:/dev/net/tun
       - ./tailscale-weaviate/state:/var/lib/tailscale
@@ -54,6 +53,7 @@ services:
 
   weaviate:
     image: semitechnologies/weaviate:latest
+    hostname: weaviate
     command:
       - --host
       - 0.0.0.0
@@ -84,7 +84,6 @@ services:
 
   tailscale-python:
     image: tailscale/tailscale:latest
-    hostname: tailscale-python
     volumes:
       - /dev/net/tun:/dev/net/tun
       - ./tailscale-python/state:/var/lib/tailscale
@@ -101,6 +100,7 @@ services:
 
   python-app:
     image: cdaprod/python-app
+    hostname: python
     build:
       context: ./app
       dockerfile: Dockerfile
