@@ -1,4 +1,4 @@
-version: '3.8'
+version: '3.7'
 # Set Variables: TS_AUTHKEY, TS_CERT_DOMAIN, MINIO_DOMAIN, MINIO_BROWSER_REDIRECT_URL, MINIO_ROOT_USER, MINIO_ROOT_PASSWORD, WEAVIATE_ORIGIN
 # Configuration Files: TS_SERVE_CONFIG
 # ------------------------------------------
@@ -17,7 +17,7 @@ services:
     hostname: minio-ts # The Tailnet node will be named this for use with MagicDNS
     volumes:
       - /dev/net/tun:/dev/net/tun
-      - tailscale-minio-state:/var/lib/tailscale
+      - ./tailscale-minio/state:/var/lib/tailscale
     environment:
       - TS_AUTHKEY=${TS_AUTHKEY}
       - TS_STATE_DIR=/var/lib/tailscale
@@ -41,7 +41,7 @@ services:
       - minio_data:/data
     depends_on:
       - tailscale-minio
-    network_mode: container:minio-ts
+    network_mode: service:tailscale-minio
     ports:
       - "9000:9000"
       - "9001:9001"
@@ -51,7 +51,7 @@ services:
     hostname: weaviate-ts # The Tailnet node will be named this for use with MagicDNS
     volumes:
       - /dev/net/tun:/dev/net/tun
-      - tailscale-weaviate-state:/var/lib/tailscale
+      - ./tailscale-weaviate/state:/var/lib/tailscale
     environment:
       - TS_AUTHKEY=${TS_AUTHKEY}
       - TS_STATE_DIR=/var/lib/tailscale
@@ -89,7 +89,7 @@ services:
     depends_on:
       - tailscale-weaviate
       - minio
-    network_mode: container:weaviate-ts
+    network_mode: service:tailscale-weaviate
     volumes:
       - weaviate_data:/var/lib/weaviate
 
@@ -98,7 +98,7 @@ services:
     hostname: python-ts # The Tailnet node will be named this for use with MagicDNS
     volumes:
       - /dev/net/tun:/dev/net/tun
-      - tailscale-python-state:/var/lib/tailscale
+      - ./tailscale-python/state:/var/lib/tailscale
     environment:
       - TS_AUTHKEY=${TS_AUTHKEY}
       - TS_STATE_DIR=/var/lib/tailscale
@@ -120,7 +120,7 @@ services:
       - minio
     environment:
       - KEEP_CONTAINER_ALIVE=true # Set to false or remove for production
-    network_mode: container:python-ts
+    network_mode: service:tailscale-python
 
 volumes:
   minio_data:
