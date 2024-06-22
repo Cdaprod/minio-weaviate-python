@@ -41,7 +41,7 @@ services:
       - minio_data:/data
     depends_on:
       - tailscale-minio
-    network_mode: service:tailscale-minio
+    network_mode: container:minio-ts
     ports:
       - "9000:9000"
       - "9001:9001"
@@ -89,7 +89,7 @@ services:
     depends_on:
       - tailscale-weaviate
       - minio
-    network_mode: service:tailscale-weaviate
+    network_mode: container:weaviate-ts
     volumes:
       - weaviate_data:/var/lib/weaviate
 
@@ -120,7 +120,7 @@ services:
       - minio
     environment:
       - KEEP_CONTAINER_ALIVE=true # Set to false or remove for production
-    network_mode: service:tailscale-python
+    network_mode: container:python-ts
 
 volumes:
   minio_data:
