@@ -1,16 +1,27 @@
 version: '3.8'
-
+# Set Variables: TS_AUTHKEY, TS_CERT_DOMAIN, MINIO_DOMAIN, MINIO_BROWSER_REDIRECT_URL, MINIO_ROOT_USER, MINIO_ROOT_PASSWORD, WEAVIATE_ORIGIN
+# Configuration Files: TS_SERVE_CONFIG
+# ------------------------------------------
+## Commands to set environment variables:
+# export TS_AUTHKEY="your_tailscale_authkey"
+# export TS_CERT_DOMAIN="your_cert_domain"
+# export MINIO_DOMAIN="your_minio_domain"
+# export MINIO_BROWSER_REDIRECT_URL="https://${MINIO_DOMAIN}"
+# export MINIO_ROOT_USER="your_minio_root_user"
+# export MINIO_ROOT_PASSWORD="your_minio_root_password"
+# export WEAVIATE_ORIGIN="your_weaviate_origin"
+# ------------------------------------------
 services:
   tailscale-minio:
     image: tailscale/tailscale:latest
+    hostname: tailscale-minio # The Tailnet node will be named this for use with MagicDNS
     volumes:
       - /dev/net/tun:/dev/net/tun
-      - ./tailscale-minio/state:/var/lib/tailscale
-      - ./TS_SERVE_CONFIG.json:/TS_CONFIG.json
+      - tailscale-minio-state:/var/lib/tailscale
     environment:
       - TS_AUTHKEY=${TS_AUTHKEY}
       - TS_STATE_DIR=/var/lib/tailscale
-      - TS_SERVE_CONFIG=/TS_CONFIG.json
+      - TS_SERVE_CONFIG=/TS_SERVE_CONFIG.json
       - TS_EXTRA_ARGS=--advertise-routes=192.168.0.0/24 --advertise-tags=tag:infra --accept-routes --advertise-exit-node --ssh
     cap_add:
       - NET_ADMIN
@@ -19,7 +30,7 @@ services:
 
   minio:
     image: minio/minio:latest
-    hostname: minio
+    hostname: minio_server
     environment:
       MINIO_ROOT_USER: ${MINIO_ROOT_USER}
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
@@ -37,10 +48,10 @@ services:
 
   tailscale-weaviate:
     image: tailscale/tailscale:latest
+    hostname: tailscale-weaviate # The Tailnet node will be named this for use with MagicDNS
     volumes:
       - /dev/net/tun:/dev/net/tun
-      - ./tailscale-weaviate/state:/var/lib/tailscale
-      - ./TS_SERVE_CONFIG.json:/TS_SERVE_CONFIG.json
+      - tailscale-weaviate-state:/var/lib/tailscale
     environment:
       - TS_AUTHKEY=${TS_AUTHKEY}
       - TS_STATE_DIR=/var/lib/tailscale
@@ -53,7 +64,7 @@ services:
 
   weaviate:
     image: semitechnologies/weaviate:latest
-    hostname: weaviate
+    hostname: weaviate_server
     command:
       - --host
       - 0.0.0.0
@@ -68,7 +79,7 @@ services:
       PERSISTENCE_DATA_PATH: '/var/lib/weaviate'
       ENABLE_MODULES: 'backup-s3,text2vec-cohere,text2vec-huggingface,text2vec-palm,text2vec-openai,generative-openai,generative-cohere,generative-palm,ref2vec-centroid,reranker-cohere,qna-openai'
       BACKUP_S3_BUCKET: 'weaviate-backups'
-      BACKUP_S3_ENDPOINT: 'https://${MINIO_DOMAIN}:9000'
+      BACKUP_S3_ENDPOINT: '${MINIO_DOMAIN}:9000'
       BACKUP_S3_ACCESS_KEY_ID: ${MINIO_ROOT_USER}
       BACKUP_S3_SECRET_ACCESS_KEY: ${MINIO_ROOT_PASSWORD}
       BACKUP_S3_USE_SSL: 'true'
@@ -84,10 +95,10 @@ services:
 
   tailscale-python:
     image: tailscale/tailscale:latest
+    hostname: tailscale-python # The Tailnet node will be named this for use with MagicDNS
     volumes:
       - /dev/net/tun:/dev/net/tun
-      - ./tailscale-python/state:/var/lib/tailscale
-      - ./TS_SERVE_CONFIG.json:/TS_CONFIG.json
+      - tailscale-python-state:/var/lib/tailscale
     environment:
       - TS_AUTHKEY=${TS_AUTHKEY}
       - TS_STATE_DIR=/var/lib/tailscale
@@ -100,7 +111,7 @@ services:
 
   python-app:
     image: cdaprod/python-app
-    hostname: python
+    hostname: python_app
     build:
       context: ./app
       dockerfile: Dockerfile
@@ -116,13 +127,9 @@ volumes:
     driver: local
   weaviate_data:
     driver: local
-  tailscale-minio:
+  tailscale-minio-state:
     driver: local
-  tailscale-weaviate:
+  tailscale-weaviate-state:
     driver: local
-  tailscale-python:
+  tailscale-python-state:
     driver: local
-
-networks:
-  app_network:
-    driver: bridge
