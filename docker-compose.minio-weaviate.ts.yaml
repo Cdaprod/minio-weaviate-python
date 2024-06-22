@@ -17,7 +17,7 @@ services:
     hostname: tailscale-minio # The Tailnet node will be named this for use with MagicDNS
     volumes:
       - /dev/net/tun:/dev/net/tun
-      - ${PWD}/tailscale-minio/state:/var/lib/tailscale
+      - tailscale-minio-state:/var/lib/tailscale
     environment:
       - TS_AUTHKEY=${TS_AUTHKEY}
       - TS_STATE_DIR=/var/lib/tailscale
@@ -51,7 +51,7 @@ services:
     hostname: tailscale-weaviate # The Tailnet node will be named this for use with MagicDNS
     volumes:
       - /dev/net/tun:/dev/net/tun
-      - ${PWD}/tailscale-weaviate/state:/var/lib/tailscale
+      - tailscale-weaviate-state:/var/lib/tailscale
     environment:
       - TS_AUTHKEY=${TS_AUTHKEY}
       - TS_STATE_DIR=/var/lib/tailscale
@@ -98,7 +98,7 @@ services:
     hostname: tailscale-python # The Tailnet node will be named this for use with MagicDNS
     volumes:
       - /dev/net/tun:/dev/net/tun
-      - ${PWD}/tailscale-python/state:/var/lib/tailscale
+      - tailscale-python-state:/var/lib/tailscale
     environment:
       - TS_AUTHKEY=${TS_AUTHKEY}
       - TS_STATE_DIR=/var/lib/tailscale
@@ -127,11 +127,11 @@ volumes:
     driver: local
   weaviate_data:
     driver: local
-  tailscale-minio:
+  tailscale-minio-state:
     driver: local
-  tailscale-weaviate:
+  tailscale-weaviate-state:
     driver: local
-  tailscale-python:
+  tailscale-python-state:
     driver: local
 
 networks:
