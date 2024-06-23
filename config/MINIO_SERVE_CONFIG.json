@@ -1,0 +1,19 @@
+{
+  "TCP": {
+    "443": {
+      "HTTPS": true
+    }
+  },
+  "Web": {
+    "minio.${TS_CERT_DOMAIN}:443": {
+      "Handlers": {
+        "/": {
+          "Proxy": "http://127.0.0.1:9001"
+        }
+      }
+    }
+  },
+  "AllowFunnel": {
+    "minio.${TS_CERT_DOMAIN}:443": false
+  }
+}
