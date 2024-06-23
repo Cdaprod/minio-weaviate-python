@@ -21,31 +21,34 @@ docker-compose -p ts-services -f docker-compose.minio-weaviate-python.ts.yaml do
 # Bring up the services with a fresh build
 docker-compose -p ts-services -f docker-compose.minio-weaviate-python.ts.yaml up -d --build
 
-echo "Waiting 5 seconds"
-sleep 5
+echo "Waiting 10 seconds for containers to start"
+sleep 10
 
 echo "Docker Processes"
 docker ps
-
-echo "Waiting 5 seconds"
-sleep 5
 
 # Find container names dynamically
 minio_container=$(docker ps --filter "name=ts-services_minio" --format "{{.Names}}")
 weaviate_container=$(docker ps --filter "name=ts-services_weaviate" --format "{{.Names}}")
 python_app_container=$(docker ps --filter "name=ts-services_python-app" --format "{{.Names}}")
 
-echo "Docker Logs MinIO"
-docker logs --tail 20 $minio_container
+if [ -z "$minio_container" ]; then
+    echo "MinIO container not found!"
+else
+    echo "Docker Logs MinIO"
+    docker logs --tail 20 $minio_container
+fi
 
-echo "Waiting 5 seconds"
-sleep 5
+if [ -z "$weaviate_container" ]; then
+    echo "Weaviate container not found!"
+else
+    echo "Docker Logs Weaviate"
+    docker logs --tail 20 $weaviate_container
+fi
 
-echo "Docker Logs Weaviate"
-docker logs --tail 20 $weaviate_container
-
-echo "Waiting 5 seconds"
-sleep 5
-
-echo "Docker Logs Python-App"
-docker logs --tail 20 $python_app_container
+if [ -z "$python_app_container" ]; then
+    echo "Python-App container not found!"
+else
+    echo "Docker Logs Python-App"
+    docker logs --tail 20 $python_app_container
+fi
