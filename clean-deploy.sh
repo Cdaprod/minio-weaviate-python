@@ -31,6 +31,9 @@ docker ps
 minio_container=$(docker ps --filter "name=ts-services_minio" --format "{{.Names}}")
 weaviate_container=$(docker ps --filter "name=ts-services_weaviate" --format "{{.Names}}")
 python_app_container=$(docker ps --filter "name=ts-services_python-app" --format "{{.Names}}")
+tailscale_minio_container=$(docker ps --filter "name=ts-services_tailscale-minio" --format "{{.Names}}")
+tailscale_weaviate_container=$(docker ps --filter "name=ts-services_tailscale-weaviate" --format "{{.Names}}")
+tailscale_python_container=$(docker ps --filter "name=ts-services_tailscale-python" --format "{{.Names}}")
 
 if [ -z "$minio_container" ]; then
     echo "MinIO container not found!"
@@ -51,4 +54,25 @@ if [ -z "$python_app_container" ]; then
 else
     echo "Docker Logs Python-App"
     docker logs --tail 20 $python_app_container
+fi
+
+if [ -z "$tailscale_minio_container" ]; then
+    echo "Tailscale MinIO container not found!"
+else
+    echo "Docker Logs Tailscale MinIO"
+    docker logs --tail 20 $tailscale_minio_container
+fi
+
+if [ -z "$tailscale_weaviate_container" ]; then
+    echo "Tailscale Weaviate container not found!"
+else
+    echo "Docker Logs Tailscale Weaviate"
+    docker logs --tail 20 $tailscale_weaviate_container
+fi
+
+if [ -z "$tailscale_python_container" ]; then
+    echo "Tailscale Python container not found!"
+else
+    echo "Docker Logs Tailscale Python"
+    docker logs --tail 20 $tailscale_python_container
 fi
