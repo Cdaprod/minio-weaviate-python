@@ -31,17 +31,17 @@ echo "Waiting 5 seconds"
 sleep 5
 
 echo "Docker Logs MinIO"
-docker logs --tail 20 minio
+docker logs --tail 20 minio_1
 
 echo "Waiting 5 seconds"
 sleep 5
 
 echo "Docker Logs Weaviate"
-docker logs --tail 20 weaviate
+docker logs --tail 20 weaviate_1
 
 echo "Waiting 5 seconds"
 sleep 5
 
 echo "Docker Logs Python-App"
-docker logs --tail 20 python-app
+docker logs --tail 20 python-app_1
 
