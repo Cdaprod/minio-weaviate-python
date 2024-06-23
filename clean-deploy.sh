@@ -56,6 +56,8 @@ else
     docker logs --tail 20 $python_app_container
 fi
 
+echo "Listing MinIO, Weaviate, and Python Tailscale Sidecar Containers"
+
 if [ -z "$tailscale_minio_container" ]; then
     echo "Tailscale MinIO container not found!"
 else
