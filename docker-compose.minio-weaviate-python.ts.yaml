@@ -6,11 +6,11 @@ services:
     volumes:
       - /dev/net/tun:/dev/net/tun
       - ./tailscale-minio/state:/var/lib/tailscale
-      - ./config/MINIO_SERVE_CONFIG.json:/config/MINIO_SERVE_CONFIG.json:ro
+      - ./config/MINIO_SERVE_CONFIG.json:/config/TS_SERVE_CONFIG.json:ro
     environment:
       - TS_AUTHKEY=${TS_AUTHKEY}
       - TS_STATE_DIR=/var/lib/tailscale
-      - TS_SERVE_CONFIG=/config/MINIO_SERVE_CONFIG.json
+      - TS_SERVE_CONFIG=/config/TS_SERVE_CONFIG.json
       - TS_EXTRA_ARGS=--advertise-routes=192.168.0.0/24 --advertise-tags=tag:infra --accept-routes --advertise-exit-node --ssh
     cap_add:
       - NET_ADMIN
@@ -38,11 +38,11 @@ services:
     volumes:
       - /dev/net/tun:/dev/net/tun
       - ./tailscale-weaviate/state:/var/lib/tailscale
-      - ./config/WEAVIATE_SERVE_CONFIG.json:/config/WEAVIATE_SERVE_CONFIG.json:ro
+      - ./config/WEAVIATE_SERVE_CONFIG.json:/config/TS_SERVE_CONFIG.json:ro
     environment:
       - TS_AUTHKEY=${TS_AUTHKEY}
       - TS_STATE_DIR=/var/lib/tailscale
-      - TS_SERVE_CONFIG=/config/WEAVIATE_SERVE_CONFIG.json
+      - TS_SERVE_CONFIG=/config/TS_SERVE_CONFIG.json
       - TS_EXTRA_ARGS=--advertise-routes=192.168.0.0/24 --advertise-tags=tag:infra --accept-routes --advertise-exit-node --ssh
     cap_add:
       - NET_ADMIN
@@ -83,11 +83,11 @@ services:
     volumes:
       - /dev/net/tun:/dev/net/tun
       - ./tailscale-python/state:/var/lib/tailscale
-      - ./config/PYTHON_SERVE_CONFIG.json:/config/PYTHON_SERVE_CONFIG.json:ro
+      - ./config/PYTHON_SERVE_CONFIG.json:/config/TS_SERVE_CONFIG.json:ro
     environment:
       - TS_AUTHKEY=${TS_AUTHKEY}
       - TS_STATE_DIR=/var/lib/tailscale
-      - TS_SERVE_CONFIG=/config/PYTHON_SERVE_CONFIG.json
+      - TS_SERVE_CONFIG=/config/TS_SERVE_CONFIG.json
       - TS_EXTRA_ARGS=--advertise-routes=192.168.0.0/24 --advertise-tags=tag:infra --accept-routes --advertise-exit-node --ssh
     cap_add:
       - NET_ADMIN
