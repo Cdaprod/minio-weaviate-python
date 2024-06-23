@@ -2,6 +2,7 @@ version: '3.7'
 services:
   tailscale-minio:
     image: tailscale/tailscale:latest
+    hostname: minio-ts
     init: true
     volumes:
       - /dev/net/tun:/dev/net/tun
@@ -23,7 +24,7 @@ services:
     environment:
       MINIO_ROOT_USER: ${MINIO_ROOT_USER}
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
-      MINIO_DOMAIN: minio.${TS_CERT_DOMAIN}
+      MINIO_DOMAIN: ${TS_CERT_DOMAIN}
       MINIO_BROWSER_REDIRECT_URL: https://${MINIO_DOMAIN}
     command: server /data --address ":9000" --console-address ":9001"
     volumes:
@@ -34,6 +35,7 @@ services:
 
   tailscale-weaviate:
     image: tailscale/tailscale:latest
+    hostname: weaviate-ts
     init: true
     volumes:
       - /dev/net/tun:/dev/net/tun
@@ -79,6 +81,7 @@ services:
 
   tailscale-python:
     image: tailscale/tailscale:latest
+    hostname: python-ts
     init: true
     volumes:
       - /dev/net/tun:/dev/net/tun
