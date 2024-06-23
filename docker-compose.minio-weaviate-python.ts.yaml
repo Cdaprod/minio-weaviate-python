@@ -5,6 +5,7 @@ services:
     volumes:
       - /dev/net/tun:/dev/net/tun
       - ./tailscale-minio/state:/var/lib/tailscale
+      - ./TS_SERVE_CONFIG.json:/TS_SERVE_CONFIG.json:ro
     environment:
       - TS_AUTHKEY=${TS_AUTHKEY}
       - TS_STATE_DIR=/var/lib/tailscale
@@ -34,6 +35,7 @@ services:
     volumes:
       - /dev/net/tun:/dev/net/tun
       - ./tailscale-weaviate/state:/var/lib/tailscale
+      - ./TS_SERVE_CONFIG.json:/TS_SERVE_CONFIG.json:ro
     environment:
       - TS_AUTHKEY=${TS_AUTHKEY}
       - TS_STATE_DIR=/var/lib/tailscale
@@ -76,6 +78,7 @@ services:
     volumes:
       - /dev/net/tun:/dev/net/tun
       - ./tailscale-python/state:/var/lib/tailscale
+      - ./TS_SERVE_CONFIG.json:/TS_SERVE_CONFIG.json:ro
     environment:
       - TS_AUTHKEY=${TS_AUTHKEY}
       - TS_STATE_DIR=/var/lib/tailscale
