@@ -16,7 +16,7 @@ docker network prune -f
 docker image prune -f
 
 # Bring down any running services and remove orphans
-docker-compose -f docker-compose.minio-weaviate-python.ts.yaml down --remove-orphans
+docker-compose -f ~/minio-weaviate/docker-compose.minio-weaviate-python.ts.yaml down --remove-orphans
 
 # Bring up the services with a fresh build
-docker-compose -f docker-compose.minio-weaviate-python.ts.yaml up -d --build
+docker-compose -f ~/minio-weaviate/docker-compose.minio-weaviate-python.ts.yaml up -d --build
