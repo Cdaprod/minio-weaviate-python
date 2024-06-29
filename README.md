@@ -31,6 +31,7 @@ The following directory tree is programatically generated to provide an overview
 │   ├── TS_SERVE_CONFIG.json
 │   └── WEAVIATE_SERVE_CONFIG.JSON
 ├── deploy.sh
+├── docker-compose.minio-weaviate-python.ts-2.yaml
 ├── docker-compose.minio-weaviate-python.ts.yaml
 ├── docker-compose.minio-weaviate.ts.yaml
 ├── docker-compose.yaml
@@ -49,7 +50,7 @@ The following directory tree is programatically generated to provide an overview
         ├── weaviate-schema.json
         └── weaviate_logs.txt
 
-8 directories, 25 files
+8 directories, 26 files
 
 ```
 <!-- DIRECTORY_TREE_END -->
